@@ -2,9 +2,9 @@ name: Building and deploying GitHub pages
 
 on:
   schedule:
-  # See https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
-  # run every hour at xx:20
-  - cron: "20 * * * *"
+    # See https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
+    # run every hour at xx:20
+    - cron: "20 * * * *"
  
 jobs:
   daily_build:

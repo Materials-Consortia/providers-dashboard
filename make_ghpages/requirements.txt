@@ -1,0 +1,4 @@
+jinja2
+# This will need to be updated, pinning it to the first vesion that will
+# support the final v1 specs
+optimade==0.8.1

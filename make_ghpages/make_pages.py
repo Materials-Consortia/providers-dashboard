@@ -70,7 +70,7 @@ def get_index_metadb_data(base_url):
     # Let's continue, it was found
     try:
         json_response = json.loads(response_content)
-        info_response = IndexInfoResponse(**json_response)
+        IndexInfoResponse(**json_response)
     except Exception as exc:
         # Adapt the badge info
         provider_data['state'] = "validation error"
@@ -101,7 +101,7 @@ def get_index_metadb_data(base_url):
 
     try:
         links_json_response = json.loads(response_content)
-        links_response = LinksResponse(**links_json_response)
+        LinksResponse(**links_json_response)
     except Exception as exc:
         # Adapt the badge info
         provider_data['links_state'] = "validation error"

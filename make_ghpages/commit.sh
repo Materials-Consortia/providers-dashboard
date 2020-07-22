@@ -15,7 +15,7 @@ fi
 
 # Move html to temp dir
 mv make_ghpages/out ../page-build
-git checkout ${TARGET_BRANCH} || git checkout --orphan ${TARGET_BRANCH}
+git checkout "${TARGET_BRANCH}" || git checkout --orphan "${TARGET_BRANCH}"
 rm -rf * || exit 0
 cp -r ../page-build/* .
 

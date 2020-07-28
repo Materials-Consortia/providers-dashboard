@@ -5,8 +5,8 @@ on:
   # See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onschedule for more info.
   schedule:
     # See https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
-    # run every hour at xx:20
-    - cron: "20 * * * *"
+    # run every day at 05:20 UTC
+    - cron: "20 5 * * *"
 
 jobs:
   daily_build:

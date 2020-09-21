@@ -1,2 +1,2 @@
 jinja2==3.0.0a1
-optimade~=0.10.0
+optimade>=0.12.0

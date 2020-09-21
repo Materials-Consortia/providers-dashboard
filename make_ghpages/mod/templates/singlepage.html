@@ -72,7 +72,17 @@
             <p><strong><a href="{{subdb.attributes.base_url | extract_url }}" target="_blank">{{subdb.attributes.name}}</strong></a>
         (<code>{{subdb.id}}{% if index_metadb.default_subdb == subdb.id %}, default sub-database{% endif %}</code>)
         </p>
-        <div>{{subdb.attributes.description}}</div>
+            <div>{{subdb.attributes.description}}</div>
+            {% if subdb.attributes.base_url %}
+                <span class="badge" style="display: table-row; line-height: 2; font-size: 0.8em;">
+                    <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left blue tooltip" style="float: none; display: inline; text-align: right; border: none">Validation<span class="tooltiptext">Results of validation</span></span></span>
+                    {% if index_metadb.subdb_validation[subdb.attributes.base_url].valid %}
+                        <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right green tooltip" style="float: none; display: inline; text-align: left; border: none">Passed {{index_metadb.subdb_validation[subdb.attributes.base_url]['success_count']}} / {{index_metadb.subdb_validation[subdb.attributes.base_url]['total_count']}}</span></span>
+                    {% else %}
+                        <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right red tooltip" style="float: none; display: inline; text-align: left; border: none">Passed {{index_metadb.subdb_validation[subdb.attributes.base_url]['success_count']}} / {{index_metadb.subdb_validation[subdb.attributes.base_url]['total_count']}}</span></span>
+                    {% endif %}
+                </span>
+            {% endif %}
         </li>
         {% endfor %}
         </ul>

@@ -176,7 +176,7 @@ def validate_childdb(url: str) -> dict:
     validator = ImplementationValidator(
         base_url=url,
         run_optional_tests=False,
-        verbosity=-1,
+        verbosity=0,
         fail_fast=False
     )
 

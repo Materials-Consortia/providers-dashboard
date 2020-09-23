@@ -135,6 +135,19 @@ def get_index_metadb_data(base_url):
         provider_data["subdb_validation"][url]["internal_errors"] = bool(results["internal_failure_count"])
         # Count errors apart from internal errors
         provider_data["subdb_validation"][url]["total_count"] = results["success_count"] + results["failure_count"]
+        ratio = results["success_count"] / (results["success_count"] + results["failure_count"])
+        # Use the red/green values from the badge css
+        ratio = 2 * (max(0.5, ratio) - 0.5)
+        green = (77, 175, 74)
+        red = (228, 26, 28)
+        colour = list(green)
+
+        for ind, channel in enumerate(colour):
+            gradient = red[ind] - green[ind]
+            colour[ind] += gradient * (1 - ratio)
+
+        colour = [str(int(channel)) for channel in colour]
+        provider_data["subdb_validation"][url]["_validator_results_colour"] = f"rgb({','.join(colour)});"
 
     return provider_data
 

@@ -9,6 +9,7 @@ import urllib.request
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
+from optimade.validator import ImplementationValidator
 
 # Subfolders
 OUT_FOLDER = 'out'
@@ -120,7 +121,33 @@ def get_index_metadb_data(base_url):
         key=lambda subdb: (subdb['id']!=provider_data['default_subdb'], subdb['id']))
 
     # Count the non-null ones
-    provider_data['num_non_null_subdbs'] = len([subdb for subdb in provider_data['subdbs'] if subdb['attributes']['base_url']])
+    non_null_subdbs = [subdb for subdb in provider_data["subdbs"] if subdb["attributes"]["base_url"]]
+    provider_data['num_non_null_subdbs'] = len(non_null_subdbs)
+
+    provider_data["subdb_validation"] = {}
+    for subdb in non_null_subdbs:
+        url = subdb["attributes"]["base_url"]
+        results = validate_childdb(url)
+        provider_data["subdb_validation"][url] = {}
+        provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
+        provider_data["subdb_validation"][url]["success_count"] = results["success_count"]
+        provider_data["subdb_validation"][url]["failure_count"] = results["failure_count"]
+        provider_data["subdb_validation"][url]["internal_errors"] = bool(results["internal_failure_count"])
+        # Count errors apart from internal errors
+        provider_data["subdb_validation"][url]["total_count"] = results["success_count"] + results["failure_count"]
+        ratio = results["success_count"] / (results["success_count"] + results["failure_count"])
+        # Use the red/green values from the badge css
+        ratio = 2 * (max(0.5, ratio) - 0.5)
+        green = (77, 175, 74)
+        red = (228, 26, 28)
+        colour = list(green)
+
+        for ind, channel in enumerate(colour):
+            gradient = red[ind] - green[ind]
+            colour[ind] += gradient * (1 - ratio)
+
+        colour = [str(int(channel)) for channel in colour]
+        provider_data["subdb_validation"][url]["_validator_results_colour"] = f"rgb({','.join(colour)});"
 
     return provider_data
 
@@ -132,6 +159,33 @@ def get_html_provider_fname(provider_id):
     simple_string = "".join(c for c in provider_id if c in valid_characters)
 
     return "{}.html".format(simple_string)
+
+
+def validate_childdb(url: str) -> dict:
+    """ Run the optimade-python-tools validator on the child database.
+
+    Parameters:
+        url: the URL of the child database.
+
+    Returns:
+        dictionary representation of the validation results.
+
+    """
+    import dataclasses
+    from traceback import print_exc
+    validator = ImplementationValidator(
+        base_url=url,
+        run_optional_tests=False,
+        verbosity=0,
+        fail_fast=False
+    )
+
+    try:
+        validator.validate_implementation()
+    except Exception:
+        print_exc()
+
+    return dataclasses.asdict(validator.results)
 
 
 def make_pages():

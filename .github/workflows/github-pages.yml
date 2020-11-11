@@ -8,6 +8,11 @@ on:
     # run every day at 05:20 UTC
     - cron: "20 5 * * *"
 
+  # also update pages on pushes to master
+  push:
+    branches:
+      - master
+
 jobs:
   daily_build:
     runs-on: ubuntu-latest

@@ -127,7 +127,7 @@ def get_index_metadb_data(base_url):
     provider_data["subdb_validation"] = {}
     for subdb in non_null_subdbs:
         url = subdb["attributes"]["base_url"]
-        results = validate_childdb(url)
+        results = validate_childdb(url + "/v1" if not url.endswith("/v1") else "")
         provider_data["subdb_validation"][url] = {}
         provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
         provider_data["subdb_validation"][url]["success_count"] = results["success_count"]

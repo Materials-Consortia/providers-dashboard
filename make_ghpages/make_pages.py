@@ -12,12 +12,14 @@ from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
 
 # Subfolders
-OUT_FOLDER = 'out'
-STATIC_FOLDER = 'static'
-HTML_FOLDER = 'providers'  # Name for subfolder where HTMLs for providers are going to be sitting
-TEMPLATES_FOLDER = 'templates'
+OUT_FOLDER = "out"
+STATIC_FOLDER = "static"
+HTML_FOLDER = (
+    "providers"  # Name for subfolder where HTMLs for providers are going to be sitting
+)
+TEMPLATES_FOLDER = "templates"
 
-PROVIDERS_URL = 'https://providers.optimade.org/v1/links/'
+PROVIDERS_URL = "https://providers.optimade.org/v1/links/"
 
 # Absolute paths
 pwd = os.path.split(os.path.abspath(__file__))[0]
@@ -26,7 +28,7 @@ STATIC_FOLDER_ABS = os.path.join(pwd, STATIC_FOLDER)
 
 def extract_url(value):
     """To be used in the URLs of the sub databases.
-    
+
     Indeed, sometimes its a AnyUrl, sometimes a Link(AnyUrl)
     """
     try:
@@ -34,95 +36,126 @@ def extract_url(value):
     except AttributeError:
         return value
 
+
 def get_index_metadb_data(base_url):
     """Return some info after inspecting the base_url of this index_metadb."""
-    versions_to_test = ['v1', 'v0.10', 'v0']
-    
+    versions_to_test = ["v1", "v0.10", "v0"]
+
     provider_data = {}
     for version in versions_to_test:
-        info_endpoint = f'{base_url}/{version}/info'
+        info_endpoint = f"{base_url}/{version}/info"
         try:
             with urllib.request.urlopen(info_endpoint) as url_response:
                 response_content = url_response.read()
-            provider_data['info_endpoint'] = info_endpoint
+            provider_data["info_endpoint"] = info_endpoint
             break
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
                 continue
             else:
-                provider_data['state'] = "problem"
-                provider_data['tooltip_lines'] = "Generic error while fetching the data:\n{}".format(traceback.format_exc()).splitlines()
-                provider_data['color'] = "light-red"
+                provider_data["state"] = "problem"
+                provider_data[
+                    "tooltip_lines"
+                ] = "Generic error while fetching the data:\n{}".format(
+                    traceback.format_exc()
+                ).splitlines()
+                provider_data["color"] = "light-red"
                 return provider_data
     else:
         # Did not break: no version found
-        provider_data['state'] = "not found"
-        provider_data['tooltip_lines'] = ["I couldn't find the index meta-database, I tried the following versions: {}".format(
-            ", ".join(versions_to_test)
-        )]
-        provider_data['color'] = "light-red"
+        provider_data["state"] = "not found"
+        provider_data["tooltip_lines"] = [
+            "I couldn't find the index meta-database, I tried the following versions: {}".format(
+                ", ".join(versions_to_test)
+            )
+        ]
+        provider_data["color"] = "light-red"
         return provider_data
 
-    provider_data['state'] = "found"
-    provider_data['color'] = "green"
-    provider_data['version'] = version
-    
-    provider_data['default_subdb'] = None
+    provider_data["state"] = "found"
+    provider_data["color"] = "green"
+    provider_data["version"] = version
+
+    provider_data["default_subdb"] = None
     # Let's continue, it was found
     try:
         json_response = json.loads(response_content)
         IndexInfoResponse(**json_response)
-    except Exception as exc:
+    except Exception:
         # Adapt the badge info
-        provider_data['state'] = "validation error"
-        provider_data['color'] = "orange"
-        provider_data['tooltip_lines'] = "Error while validating the Index MetaDB:\n{}".format(traceback.format_exc()).splitlines()
-        provider_data['version'] = version
+        provider_data["state"] = "validation error"
+        provider_data["color"] = "orange"
+        provider_data[
+            "tooltip_lines"
+        ] = "Error while validating the Index MetaDB:\n{}".format(
+            traceback.format_exc()
+        ).splitlines()
+        provider_data["version"] = version
     else:
         try:
             # For now I use this way of getting it
-            provider_data['default_subdb'] = json_response['data']['relationships']['default']['data']['id']
+            provider_data["default_subdb"] = json_response["data"]["relationships"][
+                "default"
+            ]["data"]["id"]
         except Exception:
             # For now, whatever the error, I just ignore it
             pass
 
-    links_endpoint = f'{base_url}/{version}/links'
+    links_endpoint = f"{base_url}/{version}/links"
     try:
         with urllib.request.urlopen(links_endpoint) as url_response:
             response_content = url_response.read()
-    except urllib.error.HTTPError as exc:
-        provider_data['links_state'] = "problem"
-        provider_data['links_tooltip_lines'] = "Generic error while fetching the /links endpoint:\n{}".format(traceback.format_exc()).splitlines()
-        provider_data['links_color'] = "light-red"
+    except urllib.error.HTTPError:
+        provider_data["links_state"] = "problem"
+        provider_data[
+            "links_tooltip_lines"
+        ] = "Generic error while fetching the /links endpoint:\n{}".format(
+            traceback.format_exc()
+        ).splitlines()
+        provider_data["links_color"] = "light-red"
         return provider_data
-    
-    provider_data['links_endpoint'] = links_endpoint
-    provider_data['links_state'] = "found"
-    provider_data['links_color'] = "green"
+
+    provider_data["links_endpoint"] = links_endpoint
+    provider_data["links_state"] = "found"
+    provider_data["links_color"] = "green"
 
     try:
         links_json_response = json.loads(response_content)
         LinksResponse(**links_json_response)
-    except Exception as exc:
+    except Exception:
         # Adapt the badge info
-        provider_data['links_state'] = "validation error"
-        provider_data['links_color'] = "orange"
-        provider_data['links_tooltip_lines'] = "Error while validating the /links endpoint of the Index MetaDB:\n{}".format(traceback.format_exc()).splitlines()
+        provider_data["links_state"] = "validation error"
+        provider_data["links_color"] = "orange"
+        provider_data[
+            "links_tooltip_lines"
+        ] = "Error while validating the /links endpoint of the Index MetaDB:\n{}".format(
+            traceback.format_exc()
+        ).splitlines()
         return provider_data
 
     # We also filter out any non-child DB link type.
-    all_linked_dbs = links_json_response['data']
-    subdbs = [subdb for subdb in all_linked_dbs if subdb['attributes'].get('link_type', 'UNKNOWN') == 'child']
-    print(f"    [{len(all_linked_dbs)} links found, of which {len(subdbs)} child sub-dbs]")
+    all_linked_dbs = links_json_response["data"]
+    subdbs = [
+        subdb
+        for subdb in all_linked_dbs
+        if subdb["attributes"].get("link_type", "UNKNOWN") == "child"
+    ]
+    print(
+        f"    [{len(all_linked_dbs)} links found, of which {len(subdbs)} child sub-dbs]"
+    )
 
     # Order putting the default first, and then the rest in alphabetical order (by key)
     # Note that False gets before True.
-    provider_data['subdbs'] = sorted(subdbs,
-        key=lambda subdb: (subdb['id']!=provider_data['default_subdb'], subdb['id']))
+    provider_data["subdbs"] = sorted(
+        subdbs,
+        key=lambda subdb: (subdb["id"] != provider_data["default_subdb"], subdb["id"]),
+    )
 
     # Count the non-null ones
-    non_null_subdbs = [subdb for subdb in provider_data["subdbs"] if subdb["attributes"]["base_url"]]
-    provider_data['num_non_null_subdbs'] = len(non_null_subdbs)
+    non_null_subdbs = [
+        subdb for subdb in provider_data["subdbs"] if subdb["attributes"]["base_url"]
+    ]
+    provider_data["num_non_null_subdbs"] = len(non_null_subdbs)
 
     provider_data["subdb_validation"] = {}
     for subdb in non_null_subdbs:
@@ -130,12 +163,22 @@ def get_index_metadb_data(base_url):
         results = validate_childdb(url + "/v1" if not url.endswith("/v1") else "")
         provider_data["subdb_validation"][url] = {}
         provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
-        provider_data["subdb_validation"][url]["success_count"] = results["success_count"]
-        provider_data["subdb_validation"][url]["failure_count"] = results["failure_count"]
-        provider_data["subdb_validation"][url]["internal_errors"] = bool(results["internal_failure_count"])
+        provider_data["subdb_validation"][url]["success_count"] = results[
+            "success_count"
+        ]
+        provider_data["subdb_validation"][url]["failure_count"] = results[
+            "failure_count"
+        ]
+        provider_data["subdb_validation"][url]["internal_errors"] = bool(
+            results["internal_failure_count"]
+        )
         # Count errors apart from internal errors
-        provider_data["subdb_validation"][url]["total_count"] = results["success_count"] + results["failure_count"]
-        ratio = results["success_count"] / (results["success_count"] + results["failure_count"])
+        provider_data["subdb_validation"][url]["total_count"] = (
+            results["success_count"] + results["failure_count"]
+        )
+        ratio = results["success_count"] / (
+            results["success_count"] + results["failure_count"]
+        )
         # Use the red/green values from the badge css
         ratio = 2 * (max(0.5, ratio) - 0.5)
         green = (77, 175, 74)
@@ -147,14 +190,16 @@ def get_index_metadb_data(base_url):
             colour[ind] += gradient * (1 - ratio)
 
         colour = [str(int(channel)) for channel in colour]
-        provider_data["subdb_validation"][url]["_validator_results_colour"] = f"rgb({','.join(colour)});"
+        provider_data["subdb_validation"][url][
+            "_validator_results_colour"
+        ] = f"rgb({','.join(colour)});"
 
     return provider_data
 
 
 def get_html_provider_fname(provider_id):
     """Return a valid html filename given the provider ID."""
-    valid_characters = set(string.ascii_letters + string.digits + '_-')
+    valid_characters = set(string.ascii_letters + string.digits + "_-")
 
     simple_string = "".join(c for c in provider_id if c in valid_characters)
 
@@ -162,7 +207,7 @@ def get_html_provider_fname(provider_id):
 
 
 def validate_childdb(url: str) -> dict:
-    """ Run the optimade-python-tools validator on the child database.
+    """Run the optimade-python-tools validator on the child database.
 
     Parameters:
         url: the URL of the child database.
@@ -173,11 +218,9 @@ def validate_childdb(url: str) -> dict:
     """
     import dataclasses
     from traceback import print_exc
+
     validator = ImplementationValidator(
-        base_url=url,
-        run_optional_tests=False,
-        verbosity=0,
-        fail_fast=False
+        base_url=url, run_optional_tests=False, verbosity=0, fail_fast=False
     )
 
     try:
@@ -199,71 +242,88 @@ def make_pages():
     shutil.copytree(STATIC_FOLDER_ABS, os.path.join(OUT_FOLDER, STATIC_FOLDER))
 
     env = Environment(
-        loader=PackageLoader('mod'),
-        autoescape=select_autoescape(['html', 'xml']),
+        loader=PackageLoader("mod"),
+        autoescape=select_autoescape(["html", "xml"]),
     )
 
-    env.filters['extract_url'] = extract_url
+    env.filters["extract_url"] = extract_url
 
     with urllib.request.urlopen(PROVIDERS_URL) as url_response:
-        providers = json.load(url_response)['data']
+        providers = json.load(url_response)["data"]
 
     last_check_time = datetime.datetime.utcnow().strftime("%A %B %d, %Y at %H:%M UTC")
 
     all_provider_data = []
     # Create HTML view for each provider
     for provider in providers:
-        provider_data = {
-            'id': provider['id'],
-            'last_check_time': last_check_time
-            }
-        print("  - {}".format(provider['id']))
+        provider_data = {"id": provider["id"], "last_check_time": last_check_time}
+        print("  - {}".format(provider["id"]))
 
-        subpage = os.path.join(HTML_FOLDER, get_html_provider_fname(provider['id']))
+        subpage = os.path.join(HTML_FOLDER, get_html_provider_fname(provider["id"]))
         subpage_abspath = os.path.join(OUT_FOLDER, subpage)
 
-        provider_data['subpage'] = subpage
-        provider_data['attributes'] = provider['attributes']
+        provider_data["subpage"] = subpage
+        provider_data["attributes"] = provider["attributes"]
 
-        if provider['attributes'].get('base_url') is None:
-            provider_data['index_metadb'] = {
-                'state': "unspecified",
-                'tooltip_lines': ["The provider did not specify a base URL for the Index Meta-Database"],
-                'color': "dark-gray"
+        if provider["attributes"].get("base_url") is None:
+            provider_data["index_metadb"] = {
+                "state": "unspecified",
+                "tooltip_lines": [
+                    "The provider did not specify a base URL for the Index Meta-Database"
+                ],
+                "color": "dark-gray",
             }
         else:
-            provider_data['index_metadb'] = {}
+            provider_data["index_metadb"] = {}
             try:
-                index_metadb_data = get_index_metadb_data(provider['attributes']['base_url'])
-                provider_data['index_metadb'] = index_metadb_data
+                index_metadb_data = get_index_metadb_data(
+                    provider["attributes"]["base_url"]
+                )
+                provider_data["index_metadb"] = index_metadb_data
             except Exception:
-                provider_data['index_metadb'] = {
-                    'state': "unknown",
-                    'tooltip_lines': "Generic error while fetching the data:\n{}".format(traceback.format_exc()).splitlines(),
-                    'color': "orange"
-                    }
+                provider_data["index_metadb"] = {
+                    "state": "unknown",
+                    "tooltip_lines": "Generic error while fetching the data:\n{}".format(
+                        traceback.format_exc()
+                    ).splitlines(),
+                    "color": "orange",
+                }
 
         # Write provider html
         provider_html = env.get_template("singlepage.html").render(**provider_data)
-        with open(subpage_abspath, 'w') as f:
+        with open(subpage_abspath, "w") as f:
             f.write(provider_html)
         all_provider_data.append(provider_data)
         print("    - Page {} generated.".format(subpage))
 
     all_data = {}
-    all_data['providers'] = sorted(all_provider_data, key=lambda provider: provider['id'])
-    all_data['globalsummary'] = {
-        'with_base_url': len([provider for provider in providers if provider.get('attributes', {}).get('base_url') is not None]),
-        'num_sub_databases': sum([provider_data.get('index_metadb', {}).get('num_non_null_subdbs', 0) for provider_data in all_provider_data])
+    all_data["providers"] = sorted(
+        all_provider_data, key=lambda provider: provider["id"]
+    )
+    all_data["globalsummary"] = {
+        "with_base_url": len(
+            [
+                provider
+                for provider in providers
+                if provider.get("attributes", {}).get("base_url") is not None
+            ]
+        ),
+        "num_sub_databases": sum(
+            [
+                provider_data.get("index_metadb", {}).get("num_non_null_subdbs", 0)
+                for provider_data in all_provider_data
+            ]
+        ),
     }
 
     # Write main overview index
     print("[main index]")
     rendered = env.get_template("main_index.html").render(**all_data)
-    outfile = os.path.join(OUT_FOLDER, 'index.html')
-    with open(outfile, 'w') as f:
+    outfile = os.path.join(OUT_FOLDER, "index.html")
+    with open(outfile, "w") as f:
         f.write(rendered)
     print("  - index.html generated")
+
 
 if __name__ == "__main__":
     make_pages()

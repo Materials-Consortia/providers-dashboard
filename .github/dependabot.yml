@@ -3,14 +3,14 @@ updates:
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: weekly
+    interval: daily
   target-branch: master
   labels:
   - dependency_updates
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: monthly
+    interval: daily
   target-branch: master
   labels:
   - CI

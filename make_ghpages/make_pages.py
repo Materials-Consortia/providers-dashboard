@@ -160,9 +160,17 @@ def get_index_metadb_data(base_url):
     provider_data["subdb_validation"] = {}
     for subdb in non_null_subdbs:
         url = subdb["attributes"]["base_url"]
-        results = validate_childdb(
-            url.strip("/") + "/v1" if not url.endswith("/v1") else ""
-        )
+        if subdb["attributes"].get("aggregate", "ok") != "ok":
+            results = {}
+            results["failure_count"] = 0
+            results["success_count"] = 0
+            results["internal_failure_count"] = 0
+
+        else:
+            results = validate_childdb(
+                url.strip("/") + "/v1" if not url.endswith("/v1") else ""
+            )
+
         provider_data["subdb_validation"][url] = {}
         provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
         provider_data["subdb_validation"][url]["success_count"] = results[
@@ -178,9 +186,12 @@ def get_index_metadb_data(base_url):
         provider_data["subdb_validation"][url]["total_count"] = (
             results["success_count"] + results["failure_count"]
         )
-        ratio = results["success_count"] / (
-            results["success_count"] + results["failure_count"]
-        )
+        try:
+            ratio = results["success_count"] / (
+                results["success_count"] + results["failure_count"]
+            )
+        except ZeroDivisionError:
+            ratio = 0
         # Use the red/green values from the badge css
         ratio = 2 * (max(0.5, ratio) - 0.5)
         green = (77, 175, 74)

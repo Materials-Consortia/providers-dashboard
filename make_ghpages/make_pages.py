@@ -238,7 +238,7 @@ def validate_childdb(url: str) -> dict:
 
     try:
         validator.validate_implementation()
-    except Exception:
+    except (Exception, SystemExit):
         print_exc()
 
     return dataclasses.asdict(validator.results)

@@ -34,6 +34,7 @@ jobs:
 
     - name: Make pages
       run: cd make_ghpages && python make_pages.py
+      timeout-minutes: 60
 
     - name: Commit to gh-pages
       run: ./make_ghpages/commit.sh

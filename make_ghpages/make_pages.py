@@ -10,6 +10,7 @@ import urllib.request
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
+from optimade.server.routers.utils import get_providers
 
 # Subfolders
 OUT_FOLDER = "out"
@@ -18,8 +19,6 @@ HTML_FOLDER = (
     "providers"  # Name for subfolder where HTMLs for providers are going to be sitting
 )
 TEMPLATES_FOLDER = "templates"
-
-PROVIDERS_URL = "https://providers.optimade.org/v1/links/"
 
 # Absolute paths
 pwd = os.path.split(os.path.abspath(__file__))[0]
@@ -261,8 +260,9 @@ def make_pages():
 
     env.filters["extract_url"] = extract_url
 
-    with urllib.request.urlopen(PROVIDERS_URL) as url_response:
-        providers = json.load(url_response)["data"]
+    providers = get_providers()
+    if not providers:
+        raise RuntimeError("Unable to retrieve providers list.")
 
     last_check_time = datetime.datetime.utcnow().strftime("%A %B %d, %Y at %H:%M UTC")
 
@@ -276,9 +276,11 @@ def make_pages():
         subpage_abspath = os.path.join(OUT_FOLDER, subpage)
 
         provider_data["subpage"] = subpage
-        provider_data["attributes"] = provider["attributes"]
+        provider_data["attributes"] = provider
 
-        if provider["attributes"].get("base_url") is None:
+        base_url = provider.get("base_url")
+
+        if base_url is None:
             provider_data["index_metadb"] = {
                 "state": "unspecified",
                 "tooltip_lines": [
@@ -289,9 +291,7 @@ def make_pages():
         else:
             provider_data["index_metadb"] = {}
             try:
-                index_metadb_data = get_index_metadb_data(
-                    provider["attributes"]["base_url"]
-                )
+                index_metadb_data = get_index_metadb_data(base_url)
                 provider_data["index_metadb"] = index_metadb_data
             except Exception:
                 provider_data["index_metadb"] = {

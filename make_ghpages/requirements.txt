@@ -1,2 +1,2 @@
 jinja2==3.0.1
-optimade==0.16.1
+optimade[server]==0.16.2

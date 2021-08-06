@@ -10,6 +10,7 @@ import urllib.request
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
+from optimade.server.routers.utils import get_providers
 
 # Subfolders
 OUT_FOLDER = "out"
@@ -18,8 +19,6 @@ HTML_FOLDER = (
     "providers"  # Name for subfolder where HTMLs for providers are going to be sitting
 )
 TEMPLATES_FOLDER = "templates"
-
-PROVIDERS_URL = "https://providers.optimade.org/v1/links/"
 
 # Absolute paths
 pwd = os.path.split(os.path.abspath(__file__))[0]
@@ -261,8 +260,9 @@ def make_pages():
 
     env.filters["extract_url"] = extract_url
 
-    with urllib.request.urlopen(PROVIDERS_URL) as url_response:
-        providers = json.load(url_response)["data"]
+    providers = get_providers()
+    if not providers:
+        raise RuntimeError("Unable to retrieve providers list.")
 
     last_check_time = datetime.datetime.utcnow().strftime("%A %B %d, %Y at %H:%M UTC")
 

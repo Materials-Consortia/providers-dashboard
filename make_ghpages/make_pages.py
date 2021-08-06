@@ -276,9 +276,11 @@ def make_pages():
         subpage_abspath = os.path.join(OUT_FOLDER, subpage)
 
         provider_data["subpage"] = subpage
-        provider_data["attributes"] = provider["attributes"]
+        provider_data["attributes"] = provider
 
-        if provider["attributes"].get("base_url") is None:
+        base_url = provider.get("base_url")
+
+        if base_url is None:
             provider_data["index_metadb"] = {
                 "state": "unspecified",
                 "tooltip_lines": [
@@ -289,9 +291,7 @@ def make_pages():
         else:
             provider_data["index_metadb"] = {}
             try:
-                index_metadb_data = get_index_metadb_data(
-                    provider["attributes"]["base_url"]
-                )
+                index_metadb_data = get_index_metadb_data(base_url)
                 provider_data["index_metadb"] = index_metadb_data
             except Exception:
                 provider_data["index_metadb"] = {

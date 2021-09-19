@@ -319,13 +319,7 @@ def make_pages():
         all_provider_data, key=lambda provider: provider["id"]
     )
     all_data["globalsummary"] = {
-        "with_base_url": len(
-            [
-                provider
-                for provider in providers
-                if provider.get("attributes", {}).get("base_url") is not None
-            ]
-        ),
+        "with_base_url": len(all_data["providers"]),
         "num_sub_databases": sum(
             [
                 provider_data.get("index_metadb", {}).get("num_non_null_subdbs", 0)

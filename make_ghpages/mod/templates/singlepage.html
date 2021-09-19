@@ -65,7 +65,7 @@
 
 
         {% if index_metadb.subdbs %}
-        <h3>Sub-databases provided by the provider</h3>
+        <h3>Databases served by this provider</h3>
         <ul>
         {% for subdb in index_metadb.subdbs %}
         <li>
@@ -78,6 +78,14 @@
                     <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left blue tooltip" style="float: none; display: inline; text-align: right; border: none">Validation<span class="tooltiptext">Results of validation</span></span></span>
                     <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right tooltip" style="color: #fff; background-color: {{index_metadb['subdb_validation'][subdb.attributes.base_url]['_validator_results_colour']}}; float: none; display: inline; text-align: left; border: none">Passed {{index_metadb.subdb_validation[subdb.attributes.base_url]['success_count']}} / {{index_metadb.subdb_validation[subdb.attributes.base_url]['total_count']}}</span></span>
                 </span>
+                {% if index_metadb.subdb_validation[subdb.attributes.base_url]['failure_messages'] %}
+                    <div class="errors" style="margin-top: 2em; width: 70%; font-family: monospace; font-size: 0.6em; background-color: Gainsboro; color: DimGrey; overflow: auto; white-space: nowrap; padding: 2em; border-radius: 3em;">
+                        {% for message in index_metadb.subdb_validation[subdb.attributes.base_url]['failure_messages'] %}
+                        {% set bad_url = message[0].split("-")[0] %}
+                        <b>❌ <a href={{ bad_url }} style="text-decoration: underline; color: IndianRed;">{{ bad_url | safe }}</a></b> <br /><br />
+                        <p style="margin-left: 8em; color: ">{{ message[1].replace("\n", "<br />") | safe }}</p><br />
+                        {% endfor %}
+                {% endif %}
             {% endif %}
         </li>
         {% endfor %}

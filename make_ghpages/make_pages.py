@@ -159,7 +159,7 @@ def get_index_metadb_data(base_url):
     provider_data["subdb_validation"] = {}
     for subdb in non_null_subdbs:
         url = subdb["attributes"]["base_url"]
-        if aggregate := subdb["attributes"].get("aggregate") is None:
+        if (aggregate := subdb["attributes"].get("aggregate")) is None:
             aggregate = "ok"
         if aggregate != "ok":
             results = {}

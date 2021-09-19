@@ -177,6 +177,7 @@ def get_index_metadb_data(base_url):
         provider_data["subdb_validation"][url]["success_count"] = results[
             "success_count"
         ]
+        provider_data["subdb_validation"][url]["failure_messages"] = results["failure_messages"]
         provider_data["subdb_validation"][url]["failure_count"] = results[
             "failure_count"
         ]
@@ -303,6 +304,8 @@ def make_pages():
                     ).splitlines(),
                     "color": "orange",
                 }
+
+        provider_data["title"] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
 
         # Write provider html
         provider_html = env.get_template("singlepage.html").render(**provider_data)

@@ -163,27 +163,21 @@ def get_index_metadb_data(base_url):
             aggregate = "ok"
         if aggregate != "ok":
             results = {}
+            print(f"\t\tSkipping {subdb['id']} as aggregate is set to {aggregate}.")
             results["failure_count"] = 0
+            results["failure_messages"] = []
             results["success_count"] = 0
             results["internal_failure_count"] = 0
+            results["no_aggregate_reason"] = subdb["attributes"].get("no_aggregate_reason", "No reason given")
 
         else:
             results = validate_childdb(
                 url.strip("/") + "/v1" if not url.endswith("/v1") else ""
             )
+        results["aggregate"] = aggregate
 
-        provider_data["subdb_validation"][url] = {}
+        provider_data["subdb_validation"][url] = results
         provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
-        provider_data["subdb_validation"][url]["success_count"] = results[
-            "success_count"
-        ]
-        provider_data["subdb_validation"][url]["failure_messages"] = results["failure_messages"]
-        provider_data["subdb_validation"][url]["failure_count"] = results[
-            "failure_count"
-        ]
-        provider_data["subdb_validation"][url]["internal_errors"] = bool(
-            results["internal_failure_count"]
-        )
         # Count errors apart from internal errors
         provider_data["subdb_validation"][url]["total_count"] = (
             results["success_count"] + results["failure_count"]
@@ -208,6 +202,9 @@ def get_index_metadb_data(base_url):
         provider_data["subdb_validation"][url][
             "_validator_results_colour"
         ] = f"rgb({','.join(colour)});"
+
+        if provider_data["subdb_validation"][url].get("aggregate", "ok") != "ok":
+            provider_data["subdb_validation"][url]["_validator_results_colour"] = "DarkGrey"
 
     return provider_data
 

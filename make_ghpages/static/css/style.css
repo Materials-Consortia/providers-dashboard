@@ -390,3 +390,30 @@ ul.provider-info li:before {
   content: "→";
   padding-right: 5px;
 }
+
+.errors {
+    margin-top: 1em;
+    margin-bottom: 2em;
+    max-height: 200px;
+    width: 85%;
+    font-weight: bold;
+    font-family: monospace;
+    background-color: Gainsboro;
+    color: DimGrey;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+    padding: 1em;
+    border: 1px solid IndianRed;
+}
+
+.errors a {
+    text-decoration: underline;
+    color: IndianRed;
+}
+
+.errors p {
+    color: DimGrey;
+    padding-left: 3em;
+    font-weight: normal;
+}

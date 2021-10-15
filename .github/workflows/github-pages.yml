@@ -20,7 +20,7 @@ jobs:
       COMMIT_AUTHOR: Daily Deploy Action
       COMMIT_AUTHOR_EMAIL: action@github.com
     steps:
-    - uses: actions/checkout@v2.3.4
+    - uses: actions/checkout@v2.3.5
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2.2.2

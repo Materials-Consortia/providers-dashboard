@@ -157,6 +157,7 @@ def get_index_metadb_data(base_url):
     provider_data["num_non_null_subdbs"] = len(non_null_subdbs)
 
     provider_data["subdb_validation"] = {}
+    provider_data["num_structures"] = 0
     for subdb in non_null_subdbs:
         url = subdb["attributes"]["base_url"]
         if (aggregate := subdb["attributes"].get("aggregate")) is None:
@@ -171,9 +172,11 @@ def get_index_metadb_data(base_url):
             results["no_aggregate_reason"] = subdb["attributes"].get("no_aggregate_reason", "No reason given")
 
         else:
-            results = validate_childdb(
-                url.strip("/") + "/v1" if not url.endswith("/v1") else ""
-            )
+            v1_url = url.strip("/") + "/v1" if not url.endswith("/v1") else ""
+            results = validate_childdb(v1_url)
+            results["num_structures"] = _get_structure_count(v1_url)
+            provider_data["num_structures"] += results["num_structures"]
+
         results["aggregate"] = aggregate
 
         provider_data["subdb_validation"][url] = results
@@ -232,7 +235,7 @@ def validate_childdb(url: str) -> dict:
     from traceback import print_exc
 
     validator = ImplementationValidator(
-        base_url=url, run_optional_tests=False, verbosity=1, fail_fast=False
+        base_url=url, run_optional_tests=False, verbosity=1, fail_fast=False,
     )
 
     try:
@@ -241,6 +244,17 @@ def validate_childdb(url: str) -> dict:
         print_exc()
 
     return dataclasses.asdict(validator.results)
+
+
+def _get_structure_count(url: str) -> int:
+    """Try to get the number of structures hosted at the given URL."""
+    try:
+        with urllib.request.urlopen(f"{url}/structures") as url_response:
+            response_content = json.loads(url_response.read())
+            return response_content.get("meta", {}).get("data_available", 0)
+
+    except json.JSONDecodeError:
+        return 0
 
 
 def make_pages():
@@ -303,6 +317,7 @@ def make_pages():
                 }
 
         provider_data["title"] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
+        provider_data["num_structures"] = provider_data["index_metadb"].get("num_structures", 0)
 
         # Write provider html
         provider_html = env.get_template("singlepage.html").render(**provider_data)
@@ -323,6 +338,7 @@ def make_pages():
                 for provider_data in all_provider_data
             ]
         ),
+        "num_structures": sum(prov["num_structures"] for prov in all_provider_data),
     }
 
     # Write main overview index

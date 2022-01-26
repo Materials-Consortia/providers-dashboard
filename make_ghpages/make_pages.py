@@ -264,7 +264,7 @@ def validate_childdb(url: str) -> dict:
     from traceback import print_exc
 
     validator = ImplementationValidator(
-        base_url=url, run_optional_tests=False, verbosity=0, fail_fast=False
+        base_url=url, run_optional_tests=False, verbosity=0, fail_fast=False, read_timeout=100,
     )
 
     try:

@@ -6,10 +6,13 @@ import shutil
 import string
 import traceback
 import urllib.request
+import signal
+from contextlib import contextmanager
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
+from optimade.validator.utils import ResponseError
 from optimade.server.routers.utils import get_providers
 
 # Subfolders
@@ -23,6 +26,32 @@ TEMPLATES_FOLDER = "templates"
 # Absolute paths
 pwd = os.path.split(os.path.abspath(__file__))[0]
 STATIC_FOLDER_ABS = os.path.join(pwd, STATIC_FOLDER)
+
+VALIDATION_TIMEOUT = 600
+
+
+class DashboardTimeoutException(ResponseError):
+    pass
+
+
+@contextmanager
+def time_limit(timeout: float):
+    """A simple context manager that uses the signal module to raise
+    an exception if the timeout is exceeded.
+
+    Arguments:
+        timeout: The desired timeout in seconds.
+
+    """
+    def signal_handler(signal_number, frame):
+        raise DashboardTimeoutException(f"Validation timed out after {timeout} seconds. The validation run did not complete and results should be externally verified.")
+
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(timeout)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
 
 
 def extract_url(value):
@@ -235,11 +264,15 @@ def validate_childdb(url: str) -> dict:
     from traceback import print_exc
 
     validator = ImplementationValidator(
-        base_url=url, run_optional_tests=False, verbosity=1, fail_fast=False,
+        base_url=url, run_optional_tests=False, verbosity=0, fail_fast=False, read_timeout=100,
     )
 
     try:
-        validator.validate_implementation()
+        with time_limit(VALIDATION_TIMEOUT):
+            validator.validate_implementation()
+    except DashboardTimeoutException:
+        validator.results.failure_count += 1
+        validator.results.failures_messages += [f"ImplementationValidator for this provider ({url}) timed out after the configured {VALIDATION_TIMEOUT} seconds."]
     except (Exception, SystemExit):
         print_exc()
 

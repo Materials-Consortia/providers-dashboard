@@ -315,7 +315,7 @@ def make_pages():
 
     all_provider_data = []
 
-    pool = Pool(8)
+    pool = Pool(1)
     all_provider_data = pool.map(validate_provider, providers, chunksize=1)
     pool.close()
 

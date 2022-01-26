@@ -315,8 +315,7 @@ def make_pages():
 
     all_provider_data = []
 
-    print(f"Using max({os.cpu_count()}, 4) cores")
-    pool = Pool(4)
+    pool = Pool(8)
     all_provider_data = pool.map(validate_provider, providers, chunksize=1)
     pool.close()
 

@@ -2,12 +2,14 @@
 import datetime
 import json
 import os
+import io
 import shutil
 import string
 import traceback
 import urllib.request
 import signal
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
+from multiprocessing import Pool
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
@@ -311,53 +313,21 @@ def make_pages():
     if not providers:
         raise RuntimeError("Unable to retrieve providers list.")
 
-    last_check_time = datetime.datetime.utcnow().strftime("%A %B %d, %Y at %H:%M UTC")
-
     all_provider_data = []
-    # Create HTML view for each provider
-    for provider in providers:
-        provider_data = {"id": provider["id"], "last_check_time": last_check_time}
-        print("  - {}".format(provider["id"]))
 
-        subpage = os.path.join(HTML_FOLDER, get_html_provider_fname(provider["id"]))
-        subpage_abspath = os.path.join(OUT_FOLDER, subpage)
+    pool = Pool()
+    all_provider_data = pool.map(validate_provider, providers, chunksize=1)
 
-        provider_data["subpage"] = subpage
-        provider_data["attributes"] = provider
+    if len(all_provider_data) != len(providers):
+        raise RuntimeError("Catastrophic failure: provider list length does not match validation length")
 
-        base_url = provider.get("base_url")
-
-        if base_url is None:
-            provider_data["index_metadb"] = {
-                "state": "unspecified",
-                "tooltip_lines": [
-                    "The provider did not specify a base URL for the Index Meta-Database"
-                ],
-                "color": "dark-gray",
-            }
-        else:
-            provider_data["index_metadb"] = {}
-            try:
-                index_metadb_data = get_index_metadb_data(base_url)
-                provider_data["index_metadb"] = index_metadb_data
-            except Exception:
-                provider_data["index_metadb"] = {
-                    "state": "unknown",
-                    "tooltip_lines": "Generic error while fetching the data:\n{}".format(
-                        traceback.format_exc()
-                    ).splitlines(),
-                    "color": "orange",
-                }
-
-        provider_data["title"] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
-        provider_data["num_structures"] = provider_data["index_metadb"].get("num_structures", 0)
-
-        # Write provider html
+    for provider_data, provider in zip(all_provider_data, providers):
+        subpage_abspath = os.path.join(OUT_FOLDER, provider_data["subpage"])
         provider_html = env.get_template("singlepage.html").render(**provider_data)
         with open(subpage_abspath, "w") as f:
             f.write(provider_html)
         all_provider_data.append(provider_data)
-        print("    - Page {} generated.".format(subpage))
+        print("    - Page {} generated.".format(provider_data["subpage"]))
 
     all_data = {}
     all_data["providers"] = sorted(
@@ -381,6 +351,62 @@ def make_pages():
     with open(outfile, "w") as f:
         f.write(rendered)
     print("  - index.html generated")
+
+
+def validate_provider(provider: dict):
+    """For the given provider, scrape its index meta-database, collect child databases
+    and then validate them, writing the results to the singlepage HTML for that database.
+
+    Arguments:
+        provider: A dictionary containing the provider `id` and `base_url`.
+
+    Returns:
+        The results of validating the provider, including some UI state, like
+            tooltip contents and indicator colours.
+
+    """
+    last_check_time = datetime.datetime.utcnow().strftime("%A %B %d, %Y at %H:%M UTC")
+    provider_data = {"id": provider["id"], "last_check_time": last_check_time}
+
+    subpage = os.path.join(HTML_FOLDER, get_html_provider_fname(provider["id"]))
+
+    provider_data["subpage"] = subpage
+    provider_data["attributes"] = provider
+
+    base_url = provider.get("base_url")
+
+    if base_url is None:
+        provider_data["index_metadb"] = {
+            "state": "unspecified",
+            "tooltip_lines": [
+                "The provider did not specify a base URL for the Index Meta-Database"
+            ],
+            "color": "dark-gray",
+        }
+    else:
+        provider_data["index_metadb"] = {}
+        try:
+            # Print stdout from validation in a single print call to avoid interleaving with other providers when running in parallel
+            out, errs = io.StringIO(), io.StringIO()
+            with redirect_stdout(out), redirect_stderr(errs):
+                print("  - {}".format(provider["id"]))
+                index_metadb_data = get_index_metadb_data(base_url)
+            print(out.getvalue())
+            print(errs.getvalue())
+            provider_data["index_metadb"] = index_metadb_data
+        except Exception:
+            provider_data["index_metadb"] = {
+                "state": "unknown",
+                "tooltip_lines": "Generic error while fetching the data:\n{}".format(
+                    traceback.format_exc()
+                ).splitlines(),
+                "color": "orange",
+            }
+
+    provider_data["title"] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
+    provider_data["num_structures"] = provider_data["index_metadb"].get("num_structures", 0)
+
+    return provider_data
 
 
 if __name__ == "__main__":

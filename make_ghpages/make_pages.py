@@ -315,8 +315,10 @@ def make_pages():
 
     all_provider_data = []
 
-    pool = Pool()
+    print(f"Using max({os.cpu_count()}, 4) cores")
+    pool = Pool(4)
     all_provider_data = pool.map(validate_provider, providers, chunksize=1)
+    pool.close()
 
     if len(all_provider_data) != len(providers):
         raise RuntimeError("Catastrophic failure: provider list length does not match validation length")

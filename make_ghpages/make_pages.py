@@ -11,6 +11,7 @@ import signal
 from contextlib import contextmanager, redirect_stdout, redirect_stderr
 from multiprocessing import Pool
 
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator

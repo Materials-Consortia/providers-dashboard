@@ -286,7 +286,8 @@ def _get_structure_count(url: str) -> int:
             response_content = json.loads(url_response.read())
             return response_content.get("meta", {}).get("data_available", 0)
 
-    except json.JSONDecodeError:
+    except Exception as exc:
+        print(exc)
         return 0
 
 

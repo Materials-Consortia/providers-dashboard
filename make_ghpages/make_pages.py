@@ -14,6 +14,7 @@ from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
 from optimade.validator.utils import ResponseError
 from optimade.server.routers.utils import get_providers
+from optimade import __version__
 
 # Subfolders
 OUT_FOLDER = "out"
@@ -264,7 +265,15 @@ def validate_childdb(url: str) -> dict:
     from traceback import print_exc
 
     validator = ImplementationValidator(
-        base_url=url, run_optional_tests=False, verbosity=0, fail_fast=False, read_timeout=100,
+        base_url=url,
+        run_optional_tests=False,
+        verbosity=0,
+        fail_fast=False,
+        read_timeout=100,
+        http_headers={
+            "User-Agent":
+            f"optimade-python-tools validator/{__version__} (automated dashboard build for providers.optimade.org)"
+        }
     )
 
     try:
@@ -341,7 +350,8 @@ def make_pages():
             try:
                 index_metadb_data = get_index_metadb_data(base_url)
                 provider_data["index_metadb"] = index_metadb_data
-            except Exception:
+            except Exception as exc:
+                print(exc)
                 provider_data["index_metadb"] = {
                     "state": "unknown",
                     "tooltip_lines": "Generic error while fetching the data:\n{}".format(

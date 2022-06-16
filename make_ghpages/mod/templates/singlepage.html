@@ -30,7 +30,7 @@
         <p>
             <strong>Index Meta-Database URL</strong>:
             {%  if attributes.base_url %}
-             <code>{{ attributes.base_url }}</code>
+                <a href="{{ attributes.base_url }}" target="_blank"><code>{{ attributes.base_url }}</code></a>
             {% else %}
             This provider did not specify yet a <code>base_url</code> for its OPTIMADE implementation.
             {% endif %}
@@ -72,6 +72,7 @@
             <p><strong><a href="{{subdb.attributes.base_url | extract_url }}" target="_blank">{{subdb.attributes.name}}</strong></a>
         (<code>{{subdb.id}}{% if index_metadb.default_subdb == subdb.id %}, default sub-database{% endif %}</code>)
         </p>
+        <p><strong><a href="{{subdb.attributes.base_url | extract_url }}" target="_blank">{{subdb.attributes.base_url | extract_url}}</strong></a></p>
             <div>{{subdb.attributes.description}}</div>
             {% if subdb.attributes.base_url %}
                 <span class="badge" style="display: table-row; line-height: 2; font-size: 0.8em;">

@@ -37,55 +37,69 @@
 
     <div id='entrylist'>
         {% for provider in providers %}
-        <div class='submenu-entry'>
-        <h2><code>{{provider.id}}</code>:
-            <a href="{{ provider.subpage }}">{{ provider.attributes.name }}</a>
-        </h2>
+            {% if provider.attributes.base_url %}
+                <div class='submenu-entry'>
+                    <h2><code>{{provider.id}}</code>: <a href="{{ provider.subpage }}">{{ provider.attributes.name }}</a></h2>
 
-        {% if provider.attributes.description %}
-        <p class=description>{{provider.attributes.description}}</p>
-        {% endif %}
+                    {% if provider.attributes.description %}
+                        <p class=description>{{provider.attributes.description}}</p>
+                    {% endif %}
 
-        <div>
-        {% if provider.index_metadb.num_non_null_subdbs %}
-        <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left green" style="float: none; text-align: right; border: none">Available sub-databases</span></span>
-            <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right" style="float: none; text-align: left; border: none">{{ provider.index_metadb.num_non_null_subdbs }}</span></span>
-        {% endif %}
-        </div>
+                    <div>
+                        {% if provider.index_metadb.num_non_null_subdbs %}
+                            <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left green" style="float: none; text-align: right; border: none">Available sub-databases</span></span>
+                            <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right" style="float: none; text-align: left; border: none">{{ provider.index_metadb.num_non_null_subdbs }}</span></span>
+                        {% endif %}
+                    </div>
 
-        <ul class="provider-info">
+                    <ul class="provider-info">
+                        <li><strong><a href="{{ provider.subpage }}">Full details for this provider</a></strong></li>
+                        {% if provider.attributes.homepage %}
+                            <li>Project homepage: <a href="{{ provider.attributes.homepage }}" target="_blank">{{ provider.attributes.homepage }}</a></li>
+                        {% endif %}
+                        {% if provider.attributes.base_url %}
+                            <li>OPTIMADE API Base URL of the Index Meta-Database: <a href="{{ provider.attributes.base_url }}" target="_blank">{{ provider.attributes.base_url }}</a></li>
+                        {% endif %}
+                    </ul>
 
-        <li><strong><a href="{{ provider.subpage }}">Full details for this provider</a></strong></li>
-        {% if provider.attributes.homepage %}
-            <li>Project homepage: <a href="{{ provider.attributes.homepage }}" target="_blank">{{ provider.attributes.homepage }}</a>
-            </li>
-        {% endif %}
-        {% if provider.attributes.base_url %}
-            <li>OPTIMADE API Base URL of the Index Meta-Database: <a href="{{ provider.attributes.base_url }}" target="_blank">{{ provider.attributes.base_url }}</a>
-            </li>
-        {% endif %}
-
-        </ul>
-
-        {% if provider.summaryinfo %}
-        <p class="summaryinfo">
-            {% for summaryinfoelem in provider.summaryinfo %}
-            <span class="badge">
-                <span class="badge-left {{summaryinfoelem.colorclass}}">{{summaryinfoelem.text}}</span>
-                <span class="badge-right">{{summaryinfoelem.count}}</span>
-            </span>
-            {% endfor %}
-        </p>
-	    {% endif %}
-
-        </div>
-
-        {#
-            {% if not loop.last %}
-            <hr>
+                    {% if provider.summaryinfo %}
+                        <p class="summaryinfo">
+                            {% for summaryinfoelem in provider.summaryinfo %}
+                            <span class="badge">
+                                <span class="badge-left {{summaryinfoelem.colorclass}}">{{summaryinfoelem.text}}</span>
+                                <span class="badge-right">{{summaryinfoelem.count}}</span>
+                            </span>
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                </div>
             {% endif %}
-        #}
-        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div id='tool-entrylist'>
+        {% for provider in providers %}
+            {% if not provider.attributes.base_url %}
+                <div class='submenu-entry'>
+                    <h2><code>{{provider.id}}</code>:
+                        <a href="{{ provider.subpage }}">{{ provider.attributes.name }}</a>
+                    </h2>
+
+                    {% if provider.attributes.description %}
+                        <p class=description>{{provider.attributes.description}}</p>
+                    {% endif %}
+
+                    <ul class="provider-info">
+                        <li><strong><a href="{{ provider.subpage }}">Full details for this provider</a></strong></li>
+                        {% if provider.attributes.homepage %}
+                            <li>Project homepage: <a href="{{ provider.attributes.homepage }}" target="_blank">{{ provider.attributes.homepage }}</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+          {% endif %}
+      {% endfor %}
+
     </div>
 
 </main>

@@ -268,8 +268,6 @@ def validate_childdb(url: str) -> dict:
         base_url=url,
         run_optional_tests=False,
         verbosity=0,
-        minimal=True,
-        fail_fast=True,
         read_timeout=100,
         http_headers={
             "User-Agent":

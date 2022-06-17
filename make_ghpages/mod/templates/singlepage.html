@@ -14,7 +14,6 @@
     <p><a href="../index.html">&lt; back to the full provider list</a></p>
 
 
-
     <h2>General information</h2>
     <div>
         {%  if attributes.description %}
@@ -69,10 +68,10 @@
         <ul>
         {% for subdb in index_metadb.subdbs %}
         <li>
-            <p><strong><a href="{{subdb.attributes.base_url | extract_url }}" target="_blank">{{subdb.attributes.name}}</strong></a>
+            <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.name}}</strong></a>
         (<code>{{subdb.id}}{% if index_metadb.default_subdb == subdb.id %}, default sub-database{% endif %}</code>)
         </p>
-        <p><strong><a href="{{subdb.attributes.base_url | extract_url }}" target="_blank">{{subdb.attributes.base_url | extract_url}}</strong></a></p>
+        <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.base_url | extract_url}}</strong></a></p>
             <div>{{subdb.attributes.description}}</div>
             {% if subdb.attributes.base_url %}
                 <span class="badge" style="display: table-row; line-height: 2; font-size: 0.8em;">

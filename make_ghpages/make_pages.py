@@ -199,7 +199,7 @@ def get_index_metadb_data(base_url):
             results["failure_messages"] = []
             results["success_count"] = 0
             results["internal_failure_count"] = 0
-            results["no_aggregate_reason"] = subdb["attributes"].get("no_aggregate_reason", "No reason given")
+            results["no_aggregate_reason"] = subdb["attributes"].get("no_aggregate_reason", "No details given")
 
         else:
             v1_url = url.strip("/") + "/v1" if not url.endswith("/v1") else ""

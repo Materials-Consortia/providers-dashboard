@@ -94,7 +94,7 @@
                     {% else %}
                         <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left blue tooltip" style="float: none; display: inline; text-align: right; border: none">Aggregation is discouraged for this database<span class="tooltiptext">Results of validation</span></span></span>
                         <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right tooltip" style="color: #fff; background-color: {{index_metadb['subdb_validation'][subdb.attributes.base_url]['_validator_results_colour']}}; float: none; display: inline; text-align: left; border: none"> {{ index_metadb.subdb_validation[subdb.attributes.base_url]['aggregate'] }}
-                            {% if index_metadb.subdb_validation[subdb.attributes.base_url]['no_aggregate_reason'] is not none %}}
+                            {% if index_metadb.subdb_validation[subdb.attributes.base_url]['no_aggregate_reason'] is not none %}
                                 : {{ index_metadb.subdb_validation[subdb.attributes.base_url]['no_aggregate_reason'] }}
                             {% endif %}
                     </span></span>

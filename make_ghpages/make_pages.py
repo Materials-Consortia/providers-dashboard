@@ -13,7 +13,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from optimade.models import IndexInfoResponse, LinksResponse
 from optimade.validator import ImplementationValidator
 from optimade.validator.utils import ResponseError
-from optimade.server.routers.utils import get_providers
+from optimade.utils import get_providers
 from optimade import __version__
 
 # Subfolders
@@ -292,7 +292,11 @@ def _get_structure_count(url: str) -> int:
     try:
         with urllib.request.urlopen(f"{url}/structures") as url_response:
             response_content = json.loads(url_response.read())
-            return response_content.get("meta", {}).get("data_available", 0)
+            # account for inconsistencies in the metadata by taking largest of available/returned data
+            return max(
+                response_content.get("meta", {}).get("data_available", 0),
+                response_content.get("meta", {}).get("data_returned", 0),
+            )
 
     except Exception as exc:
         print(exc)

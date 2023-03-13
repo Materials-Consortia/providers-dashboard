@@ -31,6 +31,11 @@ STATIC_FOLDER_ABS = os.path.join(pwd, STATIC_FOLDER)
 VALIDATION_TIMEOUT = 600
 
 
+HTTP_USER_AGENT_HEADER = {
+    "User-Agent": "urllib.request (automated dashboard build for providers.optimade.org)"
+}
+
+
 class DashboardTimeoutException(ResponseError):
     pass
 
@@ -44,8 +49,11 @@ def time_limit(timeout: float):
         timeout: The desired timeout in seconds.
 
     """
+
     def signal_handler(signal_number, frame):
-        raise DashboardTimeoutException(f"Validation timed out after {timeout} seconds. The validation run did not complete and results should be externally verified.")
+        raise DashboardTimeoutException(
+            f"Validation timed out after {timeout} seconds. The validation run did not complete and results should be externally verified."
+        )
 
     signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(timeout)
@@ -74,7 +82,10 @@ def get_index_metadb_data(base_url):
     for version in versions_to_test:
         info_endpoint = f"{base_url}/{version}/info"
         try:
-            with urllib.request.urlopen(info_endpoint) as url_response:
+            info_req = urllib.request.Request(
+                info_endpoint, headers=HTTP_USER_AGENT_HEADER
+            )
+            with urllib.request.urlopen(info_req) as url_response:
                 response_content = url_response.read()
             provider_data["info_endpoint"] = info_endpoint
             break
@@ -132,7 +143,10 @@ def get_index_metadb_data(base_url):
 
     links_endpoint = f"{base_url}/{version}/links"
     try:
-        with urllib.request.urlopen(links_endpoint) as url_response:
+        links_req = urllib.request.Request(
+            links_endpoint, headers=HTTP_USER_AGENT_HEADER
+        )
+        with urllib.request.urlopen(links_req) as url_response:
             response_content = url_response.read()
     except urllib.error.HTTPError:
         provider_data["links_state"] = "problem"
@@ -199,7 +213,9 @@ def get_index_metadb_data(base_url):
             results["failure_messages"] = []
             results["success_count"] = 0
             results["internal_failure_count"] = 0
-            results["no_aggregate_reason"] = subdb["attributes"].get("no_aggregate_reason", "No details given")
+            results["no_aggregate_reason"] = subdb["attributes"].get(
+                "no_aggregate_reason", "No details given"
+            )
 
         else:
             v1_url = url.strip("/") + "/v1" if not url.endswith("/v1") else ""
@@ -237,7 +253,9 @@ def get_index_metadb_data(base_url):
         ] = f"rgb({','.join(colour)});"
 
         if provider_data["subdb_validation"][url].get("aggregate", "ok") != "ok":
-            provider_data["subdb_validation"][url]["_validator_results_colour"] = "DarkGrey"
+            provider_data["subdb_validation"][url][
+                "_validator_results_colour"
+            ] = "DarkGrey"
 
     return provider_data
 
@@ -270,9 +288,8 @@ def validate_childdb(url: str) -> dict:
         verbosity=0,
         read_timeout=100,
         http_headers={
-            "User-Agent":
-            f"optimade-python-tools validator/{__version__} (automated dashboard build for providers.optimade.org)"
-        }
+            "User-Agent": f"optimade-python-tools validator/{__version__} (automated dashboard build for providers.optimade.org)"
+        },
     )
 
     try:
@@ -280,7 +297,9 @@ def validate_childdb(url: str) -> dict:
             validator.validate_implementation()
     except DashboardTimeoutException:
         validator.results.failure_count += 1
-        validator.results.failures_messages += [f"ImplementationValidator for this provider ({url}) timed out after the configured {VALIDATION_TIMEOUT} seconds."]
+        validator.results.failures_messages += [
+            f"ImplementationValidator for this provider ({url}) timed out after the configured {VALIDATION_TIMEOUT} seconds."
+        ]
     except (Exception, SystemExit):
         print_exc()
 
@@ -290,7 +309,10 @@ def validate_childdb(url: str) -> dict:
 def _get_structure_count(url: str) -> int:
     """Try to get the number of structures hosted at the given URL."""
     try:
-        with urllib.request.urlopen(f"{url}/structures") as url_response:
+        structures_req = urllib.request.Request(
+            f"{url}/structures", headers=HTTP_USER_AGENT_HEADER
+        )
+        with urllib.request.urlopen(structures_req) as url_response:
             response_content = json.loads(url_response.read())
             # account for inconsistencies in the metadata by taking largest of available/returned data
             return max(
@@ -329,6 +351,8 @@ def make_pages():
     all_provider_data = []
     # Create HTML view for each provider
     for provider in providers:
+        if provider["id"] != "mp":
+            continue
         provider_data = {"id": provider["id"], "last_check_time": last_check_time}
         print("  - {}".format(provider["id"]))
 
@@ -363,8 +387,12 @@ def make_pages():
                     "color": "orange",
                 }
 
-        provider_data["title"] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
-        provider_data["num_structures"] = provider_data["index_metadb"].get("num_structures", 0)
+        provider_data[
+            "title"
+        ] = f'{provider_data["attributes"].get("name")}: OPTIMADE provider dashboard'
+        provider_data["num_structures"] = provider_data["index_metadb"].get(
+            "num_structures", 0
+        )
 
         # Write provider html
         provider_html = env.get_template("singlepage.html").render(**provider_data)

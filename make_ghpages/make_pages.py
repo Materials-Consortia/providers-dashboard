@@ -351,8 +351,6 @@ def make_pages():
     all_provider_data = []
     # Create HTML view for each provider
     for provider in providers:
-        if provider["id"] != "mp":
-            continue
         provider_data = {"id": provider["id"], "last_check_time": last_check_time}
         print("  - {}".format(provider["id"]))
 

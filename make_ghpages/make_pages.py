@@ -3,18 +3,18 @@ import datetime
 import json
 import os
 import shutil
+import signal
 import string
 import traceback
 import urllib.request
-import signal
 from contextlib import contextmanager
 
 from jinja2 import Environment, PackageLoader, select_autoescape
+from optimade import __version__
 from optimade.models import IndexInfoResponse, LinksResponse
+from optimade.utils import get_providers
 from optimade.validator import ImplementationValidator
 from optimade.validator.utils import ResponseError
-from optimade.utils import get_providers
-from optimade import __version__
 
 # Subfolders
 OUT_FOLDER = "out"

@@ -25,7 +25,7 @@
             </span>
             <span class="badge" style="display: table-row; line-height: 2;">
                 <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left green tooltip" style="float: none; display: inline; text-align: right; border: none">Number of structures<span class="tooltiptext">Number of structures served by all databases with aggregation enabled</span></span></span>
-                <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right" style="float: none; display: inline; text-align: left; border: none">{{ globalsummary.num_structures }} structures available</span></span>
+                <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right" style="float: none; display: inline; text-align: left; border: none">{{ "{:,}".format(globalsummary.num_structures) }} structures available</span></span>
             </span>
         </div>
 

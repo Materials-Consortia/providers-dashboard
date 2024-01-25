@@ -69,9 +69,10 @@ def extract_url(value):
     Indeed, sometimes its a AnyUrl, sometimes a Link(AnyUrl)
     """
     try:
-        return value.href
+        u = value.href
     except AttributeError:
-        return value
+        u = value
+    return u.strip("/")
 
 
 def get_index_metadb_data(base_url):

@@ -72,7 +72,7 @@
         {% for subdb in index_metadb.subdbs %}
         {% if subdb.attributes.base_url %}
             <li>
-                <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.name}}</strong></a>
+                <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.name}}</a></strong>
             (<code>{{subdb.id}}{% if index_metadb.default_subdb == subdb.id %}, default sub-database{% endif %}</code>)
             </p>
         {% else %}
@@ -82,7 +82,7 @@
             </p>
         {% endif %}
         {% if subdb.attributes.base_url %}
-            <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.base_url | extract_url}}</strong></a></p>
+            <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.base_url | extract_url}}</a></strong></p>
         {% else %}
             <p>No URL provided.</p>
         {% endif %}

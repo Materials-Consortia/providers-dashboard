@@ -405,7 +405,7 @@ def make_pages():
         all_provider_data, key=lambda provider: provider["id"]
     )
     all_data["globalsummary"] = {
-        "with_base_url": sum(1 for d in all_data["providers"] if d.get("base_url")),
+        "with_base_url": sum(1 for d in all_data["providers"] if d["attributes"].get("base_url")),
         "num_sub_databases": sum(
             [
                 provider_data.get("index_metadb", {}).get("num_non_null_subdbs", 0)

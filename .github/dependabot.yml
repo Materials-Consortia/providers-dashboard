@@ -3,14 +3,22 @@ updates:
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: daily
+    interval: monthly
   target-branch: master
   labels:
   - dependency_updates
+  groups:
+    python-dependencies:
+      applies-to: version-updates
+      dependency-type: production
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: daily
+    interval: monthly
   target-branch: master
   labels:
   - CI
+  groups:
+    github-actions:
+      applies-to: version-updates
+      dependency-type: production

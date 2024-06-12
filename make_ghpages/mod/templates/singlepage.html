@@ -90,7 +90,7 @@
             {% if subdb.attributes.base_url %}
             <details>
                 <summary>
-                <span class="badge" style="display: float; line-height: 2; font-size: 0.8em;">
+                <span class="badge" style="display: inline; line-height: 2; font-size: 0.8em;">
                     {% if index_metadb.subdb_validation[subdb.attributes.base_url]['aggregate'] == 'ok' %}
                         <span style="display: table-cell; float: none; text-align: right;"><span class="badge-left blue tooltip" style="float: none; display: inline; text-align: right; border: none">Validation<span class="tooltiptext">Results of validation</span></span></span>
                         <span style="display: table-cell; float: none; text-align: left;"><span class="badge-right tooltip" style="color: #fff; background-color: {{index_metadb['subdb_validation'][subdb.attributes.base_url]['_validator_results_colour']}}; float: none; display: inline; text-align: left; border: none">Passed {{index_metadb.subdb_validation[subdb.attributes.base_url]['success_count']}} / {{index_metadb.subdb_validation[subdb.attributes.base_url]['total_count']}}</span></span>

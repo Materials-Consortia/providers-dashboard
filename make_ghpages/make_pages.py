@@ -202,6 +202,7 @@ def get_index_metadb_data(base_url):
     provider_data["num_non_null_subdbs"] = len(non_null_subdbs)
 
     provider_data["subdb_validation"] = {}
+    provider_data["subdb_properties"] = {}
     provider_data["num_structures"] = 0
     for subdb in non_null_subdbs:
         url = subdb["attributes"]["base_url"]
@@ -217,9 +218,11 @@ def get_index_metadb_data(base_url):
             results["no_aggregate_reason"] = subdb["attributes"].get(
                 "no_aggregate_reason", "No details given"
             )
+            properties = {}
 
         else:
             v1_url = url.strip("/") + "/v1" if not url.endswith("/v1") else ""
+            properties = get_child_properties(v1_url)
             results = validate_childdb(v1_url)
             results["num_structures"] = _get_structure_count(v1_url)
             provider_data["num_structures"] += results["num_structures"]
@@ -227,14 +230,15 @@ def get_index_metadb_data(base_url):
         results["aggregate"] = aggregate
 
         provider_data["subdb_validation"][url] = results
-        provider_data["subdb_validation"][url]["valid"] = not results["failure_count"]
+        provider_data["subdb_properties"][url] = properties
+        provider_data["subdb_validation"][url]["valid"] = not results.get("failure_count", 0)
         # Count errors apart from internal errors
         provider_data["subdb_validation"][url]["total_count"] = (
-            results["success_count"] + results["failure_count"]
+            results.get("success_count", 0) + results.get("failure_count", 0)
         )
         try:
-            ratio = results["success_count"] / (
-                results["success_count"] + results["failure_count"]
+            ratio = results.get("success_count", 0) / (
+                results.get("success_count", 0) + results.get("failure_count", 0)
             )
         except ZeroDivisionError:
             ratio = 0
@@ -305,6 +309,39 @@ def validate_childdb(url: str) -> dict:
         print_exc()
 
     return dataclasses.asdict(validator.results)
+
+def get_child_properties(url: str) -> dict:
+    """Get the properties served by the child database.
+
+    Parameters:
+        url: the URL of the child database.
+
+    Returns:
+        dictionary representation of the properties of the child database,
+        broken down by entrypoint.
+
+    """
+    try:
+        properties = {}
+        info_req = urllib.request.Request(
+            f"{url}/info", headers=HTTP_USER_AGENT_HEADER
+        )
+        with urllib.request.urlopen(info_req) as url_response:
+            response_content = json.loads(url_response.read())
+        entry_types = response_content.get("data", {}).get("attributes", {}).get("entry_types_by_format", {}).get("json", [])
+        for _type in entry_types:
+            entry_info_req = urllib.request.Request(
+            f"{url}/info/{_type}", headers=HTTP_USER_AGENT_HEADER
+        )
+            with urllib.request.urlopen(entry_info_req) as url_response:
+                response_content = json.loads(url_response.read())
+            properties[_type] = response_content.get("data", {}).get("properties", {})
+
+        return properties
+
+    except Exception as exc:
+        print(exc)
+        return {}
 
 
 def _get_structure_count(url: str) -> int:

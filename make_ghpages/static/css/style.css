@@ -48,7 +48,6 @@ h1 {
     font-weight: bold;
 }
 
-// Needs to be there to activate elements
 span {
 }
 
@@ -415,4 +414,12 @@ ul.provider-info li:before {
     color: DimGrey;
     padding-left: 3em;
     font-weight: normal;
+}
+
+.property-name {
+    font-family: monospace;
+}
+
+.property-description {
+    font-size: 0.6rem;
 }

@@ -12,8 +12,6 @@
     </h1>
 
     <p><a href="../index.html">&lt; back to the full provider list</a></p>
-
-
     <h2>General information</h2>
     <div>
         {%  if attributes.description %}
@@ -88,21 +86,31 @@
         {% endif %}
         <div>{{subdb.attributes.description}}</div>
         {% if subdb.attributes.base_url %}
-            <h4>Properties served by this database</h4>
+            <h4>Properties served by this database:</h4>
+            By entry type (click to expand):
+            <ul>
             {% for entry_type in index_metadb.subdb_properties[subdb.attributes.base_url] %}
-                <p><strong>{{entry_type}}</strong></p>
-                <ul>
-                {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] %}
                 <li>
-                    <details>
-                        <summary>{{property}}</summary>
-                    Unit: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} </br>
-                    Description: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}
+                    <details><summary><strong>{{entry_type}}</strong></summary>
+                        <ul>
+                            {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] %}
+                            <li>
+                                <details>
+                                    <summary><span class="property-name">{{property}}</span></summary>
+                                {% if index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property].get('unit') %}
+                                <b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} </br>
+                                {% endif %}
+                                <span class="property-desc"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}</span></br>
+                                <b>Type></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}</br>
+                                </details>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </summary>
                     </details>
-                </li>
-                {% endfor %}
-                </ul>
             {% endfor %}
+            </ul>
+            <h4>Validation</h4>
             <details>
                 <summary>
                 <span class="badge" style="display: inline; line-height: 2; font-size: 0.8em;">

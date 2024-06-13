@@ -69,7 +69,7 @@
         {% if index_metadb.subdbs %}
         <h3>Databases served by this provider</h3>
         <ul>
-        {% for subdb in index_metadb.subdbs %}
+        {% for subdb in index_metadb.subdbs %}  
         {% if subdb.attributes.base_url %}
             <li>
                 <p><strong><a href="{{subdb.attributes.base_url | extract_url }}/v1/info" target="_blank">{{subdb.attributes.name}}</a></strong>
@@ -86,8 +86,23 @@
         {% else %}
             <p>No URL provided.</p>
         {% endif %}
-            <div>{{subdb.attributes.description}}</div>
-            {% if subdb.attributes.base_url %}
+        <div>{{subdb.attributes.description}}</div>
+        {% if subdb.attributes.base_url %}
+            <h4>Properties served by this database</h4>
+            {% for entry_type in index_metadb.subdb_properties[subdb.attributes.base_url] %}
+                <p><strong>{{entry_type}}</strong></p>
+                <ul>
+                {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] %}
+                <li>
+                    <details>
+                        <summary>{{property}}</summary>
+                    Unit: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} </br>
+                    Description: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}
+                    </details>
+                </li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
             <details>
                 <summary>
                 <span class="badge" style="display: inline; line-height: 2; font-size: 0.8em;">
@@ -104,17 +119,19 @@
                     {% endif %}
                 </span>
                 </summary>
+                <div class="errors">
                 {% if index_metadb.subdb_validation[subdb.attributes.base_url].get('failure_messages') %}
-                    <div class="errors">
-                        {% for message in index_metadb.subdb_validation[subdb.attributes.base_url]['failure_messages'] %}
-                            {% set bad_url = message[0].split(" - ")[0] %}
-                            ❌ <a href="{{ bad_url }}">{{ bad_url | safe }}</a><br /><br />
-                            <p>{{ message[1].replace("\n", "<br />") | safe }}</p><br />
-                        {% endfor %}
-                    </div>
+                    {% for message in index_metadb.subdb_validation[subdb.attributes.base_url]['failure_messages'] %}
+                        {% set bad_url = message[0].split(" - ")[0] %}
+                        ❌ <a href="{{ bad_url }}">{{ bad_url | safe }}</a><br /><br />
+                        <p>{{ message[1].replace("\n", "<br />") | safe }}</p><br />
+                    {% endfor %}
+                {% else %}
+                    <p>No errors reported.</p>
                 {% endif %}
+                </div>
             </details>
-            {% endif %}
+        {% endif %}
         </li>
         {% endfor %}
         </ul>

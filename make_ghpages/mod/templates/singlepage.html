@@ -98,10 +98,10 @@
                                 <details>
                                     <summary><span class="property-name">{{property}}</span></summary>
                                 {% if index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property].get('unit') %}
-                                <b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} </br>
+                                <b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} <br />
                                 {% endif %}
-                                <span class="property-desc"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}</span></br>
-                                <b>Type></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}</br>
+                                <span class="property-desc"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}</span><br />
+                                <b>Type></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}<br />
                                 </details>
                             </li>
                             {% endfor %}

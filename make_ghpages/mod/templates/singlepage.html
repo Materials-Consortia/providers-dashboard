@@ -100,16 +100,15 @@
                                 <details>
                                     <summary><span class="property-name">{{property}}</span></summary>
                                 {% if index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property].get('unit') %}
-                                <span class="property-description"><b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit'] | safe }}</span></br>
+                                <span class="property-description"><b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit'] | safe }}</span><br />
                                 {% endif %}
-                                <span class="property-description"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description'] | safe }}</span></br>
-                                <span class="property-description"><b>Type</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}</span></br>
+                                <span class="property-description"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description'] | safe }}</span><br />
+                                <span class="property-description"><b>Type</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}</span><br />
                                 </details>
                             </li>
                             {% endif %}
                             {% endfor %}
                         </ul>
-                    </summary>
                     </details>
             {% endfor %}
             </ul>

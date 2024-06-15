@@ -88,25 +88,27 @@
         {% if subdb.attributes.base_url %}
             <h4>Properties served by this database:</h4>
             By entry type (click to expand):
-            <ul>
+            <ul style="list-style-type: none;">
             {% for entry_type in index_metadb.subdb_properties[subdb.attributes.base_url] %}
-                <li>
-                    <details><summary><strong>{{entry_type}}</strong></summary>
-                        <ul>
+                <li style="padding: 0.5em;">
+                    <details><summary><span class="entry-type-name">{{entry_type}}</span></summary>
+                        <ul style="list-style-type: none; padding-top: 0.5em;">
+                            <li>The full list of standard OPTIMADE properties.</li>
                             {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] %}
-                            <li>
+                            {% if property.startswith("_") %}
+                            <li style="padding: 0.5em">
                                 <details>
                                     <summary><span class="property-name">{{property}}</span></summary>
                                 {% if index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property].get('unit') %}
-                                <b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit']}} <br />
+                                <span class="property-description"><b>Unit></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['unit'] | safe }}</span><br />
                                 {% endif %}
-                                <span class="property-desc"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description']}}</span><br />
-                                <b>Type></b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}<br />
+                                <span class="property-description"><b>Description</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['description'] | safe }}</span><br />
+                                <span class="property-description"><b>Type</b>: {{index_metadb.subdb_properties[subdb.attributes.base_url][entry_type][property]['type']}}</span><br />
                                 </details>
                             </li>
+                            {% endif %}
                             {% endfor %}
                         </ul>
-                    </summary>
                     </details>
             {% endfor %}
             </ul>

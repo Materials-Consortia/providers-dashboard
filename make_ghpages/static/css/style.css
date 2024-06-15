@@ -418,8 +418,29 @@ ul.provider-info li:before {
 
 .property-name {
     font-family: monospace;
+    font-size: 1rem;
+    color: DarkSlateBlue;
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    padding: 0.2em 0.5em;
+    margin: 0.2em;
 }
 
 .property-description {
-    font-size: 0.6rem;
+    font-size: 0.9rem;
+    padding-left: 25px;
+    padding-top: 0.5em;
+}
+
+.entry-type-name {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    color: DarkOrchid;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    padding: 0.2em 0.5em;
+    margin: 0.2em;
 }

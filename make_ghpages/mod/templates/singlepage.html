@@ -89,7 +89,7 @@
             <h4>Properties served by this database:</h4>
             By entry type (click to expand):
             <ul style="list-style-type: none;">
-            {% for entry_type in index_metadb.subdb_properties[subdb.attributes.base_url] %}
+            {% for entry_type in index_metadb.subdb_properties[subdb.attributes.base_url] | sort %}
                 <li style="padding: 0.5em;">
                     <details><summary><span class="entry-type-name">{{entry_type}}</span></summary>
                         <ul style="list-style-type: none; padding-top: 0.5em;">

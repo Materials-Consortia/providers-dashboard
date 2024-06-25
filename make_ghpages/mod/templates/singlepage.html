@@ -94,7 +94,7 @@
                     <details><summary><span class="entry-type-name">{{entry_type}}</span></summary>
                         <ul style="list-style-type: none; padding-top: 0.5em;">
                             <li>The full list of standard OPTIMADE properties.</li>
-                            {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] %}
+                            {% for property in index_metadb.subdb_properties[subdb.attributes.base_url][entry_type] | sort %}
                             {% if property.startswith("_") %}
                             <li style="padding: 0.5em">
                                 <details>

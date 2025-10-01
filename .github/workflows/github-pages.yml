@@ -20,10 +20,10 @@ jobs:
       COMMIT_AUTHOR: Daily Deploy Action
       COMMIT_AUTHOR_EMAIL: action@github.com
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
 
@@ -40,7 +40,7 @@ jobs:
       run: ./make_ghpages/commit.sh
 
     - name: Push changes
-      uses: ad-m/github-push-action@v0.8.0
+      uses: ad-m/github-push-action@v1.0.0
       with:
         branch: gh-pages
         force: true
